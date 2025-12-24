@@ -40,7 +40,7 @@ Follow these steps to run the project locally:
 
 1. **Check for the python installation.** python --version.
    
-pip --version.
+     pip --version.
 
 3. **Install Git (if not already installed)** .
    
