@@ -92,6 +92,8 @@ Follow these steps to run the project locally:
 
      Open your browser at:  http://127.0.0.1:8000/
 
+I also deploy this project on render : (link) : ***https://first-deployed-project-ztxx.onrender.com/login/?next=/***
+
 ---
 
 **Author:** [Bhuva Prashant](https://github.com/BhuvaPrashant085)
