@@ -38,10 +38,10 @@ This project was made as part of an internship task and also includes some extra
 
 Follow these steps to run the project locally:
 
-1. **Check for the python installation** .
-python --version .
-pip --version
-..
+1. **Check for the python installation.** 
+python --version.
+pip --version.
+
 2. **Install Git (if not already installed)** .
 Download Git from https://git-scm.com/downloads .
 Install and verify: git --version
