@@ -38,57 +38,59 @@ This project was made as part of an internship task and also includes some extra
 
 Follow these steps to run the project locally:
 
-1. **Check for the python installation.** python --version.
+1. **Check for the python installation.**
+
+      python --version.
    
-     pip --version.
+      pip --version.
 
-3. **Install Git (if not already installed)** .
+3. **Install Git (if not already installed)** 
    
-Download Git from https://git-scm.com/downloads .
+      Download Git from https://git-scm.com/downloads 
 
-Install and verify: git --version
-..
-5. **Clone the project repository**.
+      install and verify: git --version
 
-git clone https://github.com/BhuvaPrashant085/Bug_tracker.git
+5. **Clone the project repository**
 
-cd Bug_tracker
+     git clone https://github.com/BhuvaPrashant085/Bug_tracker.git
+
+     cd Bug_tracker
 
 6. **Create a virtual environment**
    
-python -m venv venv
+     python -m venv venv
 
 8. **Activate the virtual environment**
    
-Windows:  venv\Scripts\activate
+     Windows:  venv\Scripts\activate
 
-Mac/Linux:  source venv/bin/activate
+     Mac/Linux:  source venv/bin/activate
 
 10. **Install required libraries**
     
-If requirements.txt exists:  pip install -r requirements.txt
+     If requirements.txt exists:  pip install -r requirements.txt
 
-If not, install manually:
+     If not, install manually:
 
-pip install django
+     pip install django
 
-pip install python-decouple
+     pip install python-decouple
 
 12. **Run migrations**
     
-python manage.py makemigrations
+     python manage.py makemigrations
 
-python manage.py migrate
+     python manage.py migrate
 
 15. **Create a superuser (admin)**
 
-python manage.py createsuperuser
+     python manage.py createsuperuser
 
 17. **Run the development server**
     
-python manage.py runserver
+     python manage.py runserver
 
-Open your browser at:  http://127.0.0.1:8000/
+     Open your browser at:  http://127.0.0.1:8000/
 
 ---
 
