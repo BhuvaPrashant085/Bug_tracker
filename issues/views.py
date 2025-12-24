@@ -1,11 +1,14 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404
 from .models import Issue
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import IssueForm
+from django.utils import timezone
+
 
 
 
@@ -66,14 +69,20 @@ def dashboard(request):
 
 @login_required(login_url='login')
 def create_issue(request):
+    
     if request.method == 'POST':
         form = IssueForm(request.POST)
         if form.is_valid():
-            form.save()
+            issue = form.save(commit=False)
+            issue.created_by = request.user
+            issue.save()
             return redirect('dashboard')
     else:
         form = IssueForm()
+
+
     return render(request, 'create_issue.html', {'form': form})
+
 
 
 @login_required(login_url='login')
@@ -127,3 +136,86 @@ def user_logout(request):
 
 
 
+@login_required
+def start_issue(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    # Check if user already has an issue in progress
+    already_working = Issue.objects.filter(
+        assigned_to=request.user,
+        status='In Progress'
+    ).exists()
+
+    if already_working:
+        messages.error(
+            request,
+            "You already have an issue in progress. Please close it first."
+        )
+        return redirect('dashboard')
+
+    issue.status = 'In Progress'
+    issue.assigned_to = request.user
+    issue.save()
+
+    messages.success(request, "Issue moved to In Progress")
+    return redirect('dashboard')
+
+
+
+@login_required
+def close_issue(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if issue.assigned_to != request.user:
+        messages.error(request, "You are not allowed to close this issue")
+        return redirect('dashboard')
+
+    issue.status = 'Closed'
+    issue.save()
+
+    messages.success(request, "Issue closed successfully")
+    return redirect('dashboard')
+
+
+def update_issue_status(request, issue_id, new_status):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if new_status == 'In Progress':
+        active_issue = Issue.objects.filter(
+            assigned_to=request.user,
+            status='In Progress'
+        ).exclude(id=issue.id).first()
+
+        if active_issue:
+            messages.error(
+                request,
+                "You already have an issue In Progress. Close it first."
+            )
+            return redirect('dashboard')
+
+        issue.status = 'In Progress'
+        issue.assigned_to = request.user
+        issue.started_at = timezone.now()   # ✅ START TIME
+        issue.save()
+
+    elif new_status == 'Closed':
+        if issue.assigned_to != request.user:
+            messages.error(request, "You cannot close this issue.")
+            return redirect('dashboard')
+
+        issue.status = 'Closed'
+        issue.closed_at = timezone.now()    # ✅ END TIME
+        issue.save()
+
+    return redirect('dashboard')
+
+
+@login_required
+def view_issue(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    context = {
+        'issue': issue
+    }
+
+    return render(request, 'view_issue.html', context)

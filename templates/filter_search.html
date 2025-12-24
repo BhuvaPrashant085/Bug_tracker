@@ -1,38 +1,243 @@
 {% load static %}
-<h2>Filter & Search Issues</h2>
-<form method="get">
-Status:
-<select name="status">
-<option>All</option>
-<option>Open</option>
-<option>In Progress</option>
-<option>Closed</option>
-</select>
-Priority:
-<select name="priority">
-<option>All</option>
-<option>Low</option>
-<option>Medium</option>
-<option>High</option>
-</select>
-<input type="text" name="search" placeholder="Search by title">
-<button type="submit">Apply</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BugTracker | Filter & Search</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Global Setup */
+        :root {
+            --brand: #6366f1;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+        }
 
-<table>
-<tr>
-<th>ID</th><th>Title</th><th>Status</th><th>Priority</th><th>Created</th>
-</tr>
-{% for issue in issues %}
-<tr>
-<td>{{ issue.id }}</td>
-<td>{{ issue.title }}</td>
-<td>{{ issue.status }}</td>
-<td>{{ issue.priority }}</td>
-<td>{{ issue.created_at|date:"d M Y" }}</td>
-</tr>
-{% empty %}
-<tr><td colspan="5">No issues found</td></tr>
-{% endfor %}
-</table>
-<a href="{% url 'dashboard' %}">Back to Dashboard</a>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            background: var(--bg); 
+            color: #475569;
+        }
+
+        /* 1. Navbar */
+        nav {
+            background: white;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo { font-weight: 800; color: var(--dark); text-decoration: none; font-size: 1.1rem; }
+        .logo i { color: var(--brand); margin-right: 8px; }
+        .nav-links a { text-decoration: none; color: #64748b; margin-left: 20px; font-size: 0.85rem; font-weight: 600; }
+
+        /* Grid Layout */
+        .wrapper {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+            padding: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 2. Sidebar Stats */
+        .sidebar { display: flex; flex-direction: column; gap: 15px; }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .stat-row:last-child { border: none; }
+        .label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; }
+        .value { font-weight: 700; color: var(--dark); }
+
+        .btn-back {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        /* 3. Filter Area (Banner Form) */
+        .filter-banner {
+            background: var(--dark);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+            margin-top: 15px;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; opacity: 0.8; }
+        
+        .filter-form select, .filter-form input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            outline: none;
+        }
+        .filter-form option { color: black; }
+        
+        .btn-apply {
+            background: var(--brand);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* 4. Results Table Section */
+        .results-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; text-align: left; padding: 15px; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; font-size: 0.9rem; border-bottom: 1px solid #f1f5f9; color: var(--dark); }
+        tr:hover { background: #fcfcfd; }
+
+        /* Priority Colors */
+        .high { color: #ef4444; font-weight: 700; }
+        .medium { color: #f59e0b; font-weight: 700; }
+        .low { color: #10b981; font-weight: 700; }
+
+        @media (max-width: 1000px) { .wrapper { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="{% url 'dashboard' %}" class="logo"><i class="fas fa-search"></i>BUG_TRACKER</a>
+    <div class="nav-links">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'create_issue' %}">New Issue</a>
+        <a href="{% url 'logout' %}" style="color:#ef4444">Logout</a>
+    </div>
+</nav>
+
+<div class="wrapper">
+    
+    <aside class="sidebar">
+        <div class="stat-box">
+            <h4 style="margin: 0 0 15px 0; font-size: 0.9rem;">Quick Stats</h4>
+            <div class="stat-row"><span class="label">Total</span><span class="value">{{ total_issues }}</span></div>
+            <div class="stat-row"><span class="label">Open</span><span class="value">{{ open_issues }}</span></div>
+            <div class="stat-row"><span class="label">In Progress</span><span class="value">{{ in_progress_issues }}</span></div>
+            <div class="stat-row"><span class="label">Closed</span><span class="value">{{ closed_issues }}</span></div>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+    </aside>
+
+    <main>
+        <div class="filter-banner">
+            <h3 style="margin:0">Filter & Search</h3>
+            <form method="get" class="filter-form">
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option>All</option>
+                        <option>Open</option>
+                        <option>In Progress</option>
+                        <option>Closed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        <option>All</option>
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+                </div>
+
+                <div class="filter-group" style="flex: 1;">
+                    <label>Search Title</label>
+                    <input type="text" name="search" placeholder="Enter keywords...">
+                </div>
+
+                <button type="submit" class="btn-apply">
+                    <i class="fas fa-filter"></i> Apply
+                </button>
+            </form>
+        </div>
+
+        <div class="results-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for issue in issues %}
+                    <tr>
+                        <td style="color:#94a3b8">#{{ issue.id }}</td>
+                        <td style="font-weight: 600;">{{ issue.title }}</td>
+                        <td>
+                            <span style="font-size: 0.8rem; background: #f1f5f9; padding: 4px 10px; border-radius: 20px;">
+                                {{ issue.status }}
+                            </span>
+                        </td>
+                        <td class="{{ issue.priority|lower }}">
+                            {{ issue.priority }}
+                        </td>
+                        <td style="color:#64748b">{{ issue.created_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 40px; color:#94a3b8">
+                            No matching issues found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -1,82 +1,234 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard - Bug Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Tracker Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: Arial; margin: 0; padding: 0 20px; background: #f4f6f7; }
-        nav { background:#34495e; color:white; padding:10px 20px; }
-        nav a { color:white; text-decoration:none; margin-left:15px; }
-        .nav-right { float:right; }
-        .cards { display:flex; justify-content:space-around; margin:20px 0; }
-        .card { padding:15px; border-radius:5px; color:white; width:22%; text-align:center; }
-        .total { background-color:#34495e; }
-        .open { background-color:#3498db; }
-        .progress { background-color:#f39c12; }
-        .closed { background-color:#2ecc71; }
-        .create-btn { background:#3498db; color:white; padding:10px 15px; border-radius:5px; text-decoration:none; margin-top:20px; display:inline-block; }
-        table { width:100%; border-collapse:collapse; margin-top:20px; background:white; }
-        th, td { border:1px solid #ccc; padding:10px; text-align:center; }
-        th { background:#bdc3c7; }
-        .high { color:red; font-weight:bold; }
-        .medium { color:orange; font-weight:bold; }
-        .low { color:green; font-weight:bold; }
+        :root {
+            --primary: #2563eb;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+        }
+
+        /* --- PART 1: NAVIGATION BAR --- */
+        nav { 
+            background: #ffffff; 
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-brand { font-weight: 900; font-size: 1.6rem; color: var(--primary); }
+        .nav-links a { 
+            color: var(--text-muted); 
+            text-decoration: none; 
+            margin-left: 1.6rem; 
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* --- GRID LAYOUT SETUP --- */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr; /* Left col: 280px, Right col: takes rest */
+            gap: 25px;
+            padding: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- PART 2: SUMMARY STATS (SIDEBAR) --- */
+        .stats-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border-left: 5px solid #cbd5e1;
+        }
+        .stat-card.total { border-left-color: #64748b; }
+        .stat-card.open { border-left-color: #3b82f6; }
+        .stat-card.progress { border-left-color: #f59e0b; }
+        .stat-card.closed { border-left-color: #10b981; }
+        
+        .stat-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; display: block; margin-top: 5px; }
+
+        /* --- RIGHT COLUMN CONTENT (PART 3 & 4) --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+            top:60px;
+            left: 30px;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+        }
+        .table-section h3 { margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; font-size: 0.9rem; border-bottom: 1px solid #f8fafc; }
+
+        /* Priority Colors */
+        .high { color: #ef4444; font-weight: 600; }
+        .medium { color: #f59e0b; font-weight: 600; }
+        .low { color: #10b981; font-weight: 600; }
+
+        .btn-action { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.85rem; }
+
+        .btn-new {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* Responsive stack */
+        @media (max-width: 900px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<!-- Navigation -->
 <nav>
-    Bug Tracker Dashboard
-    <span class="nav-right">
-        Welcome, {{ request.user.username }} |
-        <a href="{% url 'dashboard' %}">Dashboard</a> |
-        <a href="{% url 'create_issue' %}">Create Issue</a> |
-        <a href="{% url 'history' %}">History</a> |
-        <a href="{% url 'filter_search' %}">Filter / Search</a> |
-        <a href="{% url 'logout' %}">Logout</a>
-    </span>
+   <div class="nav-brand"><i class="fas fa-bug"></i> BUGTRACKER</div>
+
+    <div class="nav-links">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'history' %}">History</a>
+        <a href="{% url 'filter_search' %}">Search</a>
+        <a href="{% url 'logout' %}" style="color: #ef4444;">Logout</a>
+    </div>
 </nav>
 
-<h2>Dashboard</h2>
-<p>Welcome to your Bug Tracker Dashboard. Use the navigation above to access all features.</p>
+<div class="dashboard-container">
+    
+    <div class="stats-sidebar">
+        <div style="margin-bottom: 10px;">
+            <h2 style="margin:0; font-size: 1.4rem;">Dashboard</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Welcome, {{ request.user.username }}</p>
+        </div>
+        
+        <div class="stat-card total">
+            <span class="stat-label">Total Issues</span>
+            <span class="stat-value">{{ total_issues }}</span>
+        </div>
+        <div class="stat-card open">
+            <span class="stat-label">Open</span>
+            <span class="stat-value">{{ open_issues }}</span>
+        </div>
+        <div class="stat-card progress">
+            <span class="stat-label">In Progress</span>
+            <span class="stat-value">{{ in_progress_issues }}</span>
+        </div>
+        <div class="stat-card closed">
+            <span class="stat-label">Closed</span>
+            <span class="stat-value">{{ closed_issues }}</span>
+        </div>
 
-<div class="cards">
-    <div class="card total">Total Issues<br>{{ total_issues }}</div>
-    <div class="card open">Open<br>{{ open_issues }}</div>
-    <div class="card progress">In Progress<br>{{ in_progress_issues }}</div>
-    <div class="card closed">Closed<br>{{ closed_issues }}</div>
-</div>
+        <a href="{% url 'create_issue' %}" class="btn-new">
+            <i class="fas fa-plus"></i> New Issue
+        </a>
+    </div>
 
-<p>
-    <a href="{% url 'create_issue' %}" class="create-btn">+ Create New Issue</a>
-</p>
+    <div class="main-content">
+        
+        <div class="table-section">
+            <h3><i class="fas fa-clock-rotate-left"></i> Recent Issues</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for issue in issues|slice:":5" %} <tr>
+                        <td style="color: var(--text-muted);">#{{ issue.id }}</td>
+                        <td style="font-weight: 500;">{{ issue.title }}</td>
+                        <td>{{ issue.status }}</td>
+                        <td class="{{ issue.priority|lower }}">{{ issue.priority }}</td>
+                        <td>
+                            {% if issue.status == 'Open' %}
+                                <a href="{% url 'update_issue_status' issue.id 'In Progress' %}" class="btn-action">Start</a>
+                            {% elif issue.status == 'In Progress' and issue.assigned_to == request.user %}
+                                <a href="{% url 'update_issue_status' issue.id 'Closed' %}" class="btn-action" style="color:#10b981">Close</a>
+                            {% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">No issues.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-<h3>Recent Issues</h3>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Priority</th>
-        <th>Created</th>
-    </tr>
-    {% for issue in issues|slice:":5" %}
-    <tr>
-        <td>{{ issue.id }}</td>
-        <td>{{ issue.title }}</td>
-        <td>{{ issue.status }}</td>
-        <td class="{% if issue.priority == 'High' %}high{% elif issue.priority == 'Medium' %}medium{% else %}low{% endif %}">
-            {{ issue.priority }}
-        </td>
-        <td>{{ issue.created_at|date:"d M Y" }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="5">No issues found</td>
-    </tr>
-    {% endfor %}
-</table>
+        <div class="table-section">
+            <h3><i class="fas fa-list"></i> All Issues (Quick View)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Issue Title</th>
+                        <th>Reporter</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for issue in issues %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ issue.title }}</td>
+                        <td>{{ issue.created_by.username }}</td>
+                        <td>
+                            <a href="{% url 'view_issue' issue.id %}" class="btn-action">
+                                <i class="far fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3">No issues.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-</body>
+    </div> </div> </body>
 </html>

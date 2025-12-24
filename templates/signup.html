@@ -1,32 +1,63 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sign Up</title>
+    <meta charset="UTF-8">
+    <title>BugTracker | Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Same Styles as Login */
+        :root { --brand: #6366f1; --dark: #0f172a; --bg: #f8fafc; --border: #e2e8f0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .auth-card { background: white; width: 100%; max-width: 400px; padding: 40px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .logo-box { text-align: center; margin-bottom: 30px; }
+        .logo-box i { color: var(--brand); font-size: 2.5rem; margin-bottom: 10px; }
+        .logo-box h2 { margin: 0; color: var(--dark); font-size: 1.5rem; }
+        form label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--dark); }
+        form input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; font-family: inherit; box-sizing: border-box; }
+        form input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .btn-auth { background: var(--brand); color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-auth:hover { background: #4f46e5; }
+        .error-msg { background: #fee2e2; color: #dc2626; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
+        .footer-link { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #64748b; }
+        .footer-link a { color: var(--brand); text-decoration: none; font-weight: 600; }
+    </style>
 </head>
 <body>
-    <h2>Sign Up</h2>
+
+<div class="auth-card">
+    <div class="logo-box">
+        <i class="fas fa-user-plus"></i>
+        <h2>Join BugTracker</h2>
+        <p style="color:#64748b; font-size: 0.9rem; margin-top: 5px;">Create an account to start tracking</p>
+    </div>
 
     {% if messages %}
         {% for message in messages %}
-            <p style="color:red">{{ message }}</p>
+            <div class="error-msg">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
     <form method="post">
         {% csrf_token %}
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Choose a username" required>
 
-        <label>Username:</label><br>
-        <input type="text" name="username" required><br><br>
+        <label>Password</label>
+        <input type="password" name="password1" placeholder="Create password" required>
 
-        <label>Password:</label><br>
-        <input type="password" name="password1" required><br><br>
+        <label>Confirm Password</label>
+        <input type="password" name="password2" placeholder="Repeat password" required>
 
-        <label>Confirm Password:</label><br>
-        <input type="password" name="password2" required><br><br>
-
-        <button type="submit">Sign Up</button>
+        <button type="submit" class="btn-auth">Register Now</button>
     </form>
 
-    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    <div class="footer-link">
+        Already have an account? <a href="{% url 'login' %}">Login here</a>
+    </div>
+</div>
+
 </body>
 </html>

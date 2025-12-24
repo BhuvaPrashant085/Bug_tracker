@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'issues',
+    'issues', # it's my first app for intership 
 ]
 
 MIDDLEWARE = [

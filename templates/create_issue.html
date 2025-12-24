@@ -1,34 +1,209 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Issue - Bug Tracker</title>
-    <style>body { font-family: Arial; margin: 0; padding: 20px; background: #f4f6f7; }
-        nav { background:#34495e; color:white; padding:10px 20px; }
-        nav a { color:white; text-decoration:none; margin-left:15px; }
-        .nav-right { float:right; }
-        form { background:white; padding:20px; border-radius:5px; max-width:500px; margin-top:20px; }
-        form button { background:#3498db; color:white; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; }
-        </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+    
+        :root {
+            --primary: #2563eb;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+        }
+
+        /* --- PART 1: NAVIGATION BAR --- */
+        nav { 
+            background: #ffffff; 
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-brand { font-weight: 700; font-size: 1.2rem; color: var(--primary); text-decoration: none; }
+        .nav-links a { 
+            color: var(--text-muted); 
+            text-decoration: none; 
+            margin-left: 1.2rem; 
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* --- GRID LAYOUT SETUP --- */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+            padding: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- PART 2: SUMMARY STATS (SIDEBAR) --- */
+        .stats-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border-left: 5px solid #cbd5e1;
+        }
+        .stat-card.total { border-left-color: #64748b; }
+        .stat-card.open { border-left-color: #3b82f6; }
+        .stat-card.progress { border-left-color: #f59e0b; }
+        .stat-card.closed { border-left-color: #10b981; }
+        
+        .stat-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; display: block; margin-top: 5px; }
+
+        .btn-back {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { background: #f8fafc; color: var(--primary); }
+
+        /* --- MAIN CONTENT (FORM) --- */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+            max-width: 700px; /* Limits form width for better readability */
+        }
+        .form-section h2 { margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; }
+
+        /* Django Form Styling */
+        form p {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        form label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        form input, form select, form textarea {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: #fcfcfd;
+        }
+        form input:focus, form select:focus, form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+            width: 100%;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        @media (max-width: 900px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
 <nav>
-    Bug Tracker Dashboard
-    <span class="nav-right">
-        Welcome, {{ request.user.username }} |
-        <a href="{% url 'dashboard' %}">Dashboard</a> |
-        <a href="{% url 'logout' %}">Logout</a>
-    </span>
+    <a href="{% url 'dashboard' %}" class="nav-brand"><i class="fas fa-shield-bug"></i> BUGTRACKER</a>
+    <div class="nav-links">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'history' %}">History</a>
+        <a href="{% url 'logout' %}" style="color: #ef4444;">Logout</a>
+    </div>
 </nav>
 
-<h2>Create New Issue</h2>
+<div class="dashboard-container">
+    
+    <div class="stats-sidebar">
+        <div style="margin-bottom: 10px;">
+            <h2 style="margin:0; font-size: 1.4rem;">New Issue</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Welcome, {{ request.user.username }}</p>
+        </div>
+<div class="stat-card total">
+            <span class="stat-label">Total Issues</span>
+            <span class="stat-value">{{ total_issues }}</span>
+        </div>
+        <div class="stat-card open">
+            <span class="stat-label">Open</span>
+            <span class="stat-value">{{ open_issues }}</span>
+        </div>
+        <div class="stat-card progress">
+            <span class="stat-label">In Progress</span>
+            <span class="stat-value">{{ in_progress_issues }}</span>
+        </div>
+        <div class="stat-card closed">
+            <span class="stat-label">Closed</span>
+            <span class="stat-value">{{ closed_issues }}</span>
+        </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Create Issue</button>
-</form>
+        <a href="{% url 'dashboard' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="main-content">
+        <div class="form-section">
+            <h2><i class="fas fa-plus-circle" style="color: var(--primary);"></i> Create New Issue</h2>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">Please provide as much detail as possible to help the developers resolve the bug.</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i> Submit Issue
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>
