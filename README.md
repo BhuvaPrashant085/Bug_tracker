@@ -38,8 +38,7 @@ This project was made as part of an internship task and also includes some extra
 
 Follow these steps to run the project locally:
 
-1. **Check for the python installation.** 
-python --version.
+1. **Check for the python installation.** python --version.
 pip --version.
 
 2. **Install Git (if not already installed)** .
@@ -47,7 +46,7 @@ Download Git from https://git-scm.com/downloads .
 Install and verify: git --version
 ..
 3. **Clone the project repository**.
-git clone https://github.com/BhuvaPrashant085/Bug_tracker.git -
+git clone https://github.com/BhuvaPrashant085/Bug_tracker.git
 cd Bug_tracker
 
 4. **Create a virtual environment**
@@ -69,8 +68,10 @@ python manage.py migrate
 8. **Create a superuser (admin)**
 python manage.py createsuperuser
 
-10. **Run the development server**
+9. **Run the development server**
 python manage.py runserver
 Open your browser at:  http://127.0.0.1:8000/
 
+---
 
+**Author:** [Bhuva Prashant](https://github.com/BhuvaPrashant085)
